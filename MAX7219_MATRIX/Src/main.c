@@ -44,7 +44,7 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "MAX7219_Matrix.h"
-
+#include "MAX7219.h"
 
 
 /* USER CODE END Includes */
@@ -145,6 +145,7 @@ const uint64_t Atoz[] = {
 	0x3c607c6666000000, /* y */
 	0x3c0c18303c000000  /* z */
 };
+extern uint8_t FrameBuffer[MAX7219_IC_NUM][8];
 
 /* USER CODE END PV */
 
@@ -153,7 +154,7 @@ void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_SPI1_Init(void);
 /* USER CODE BEGIN PFP */
-
+void change_num_to(unsigned int new_num);
 
 /* USER CODE END PFP */
 
@@ -169,7 +170,7 @@ static void MX_SPI1_Init(void);
 int main(void)
 {
   /* USER CODE BEGIN 1 */
-
+  unsigned int num = 0;
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
@@ -197,55 +198,28 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-	MAX7219_MatrixInit();
-	MAX7219_MatrixUpdate();	
+	MAX7219_MatrixSetRow64(3, numbers[0]);			
+	MAX7219_MatrixSetRow64(2, numbers[0]);		
+	MAX7219_MatrixSetRow64(1, numbers[0]);		
+	MAX7219_MatrixSetRow64(0, numbers[0]);		
+	MAX7219_MatrixUpdate();			
+	HAL_Delay(200);
   while (1)
   {
-		MAX7219_MatrixSetRow64(0, symbol[0]);
-		MAX7219_MatrixSetRow64(1, symbol[0]);
+		/*MAX7219_MatrixSetRow64(3, symbol[0]);
 		MAX7219_MatrixSetRow64(2, symbol[0]);
-		MAX7219_MatrixSetRow64(3, symbol[0]);		
+		MAX7219_MatrixSetRow64(1, symbol[0]);
+		MAX7219_MatrixSetRow64(0, symbol[0]);		
 		MAX7219_MatrixUpdate();		
 		HAL_Delay(5000);
-						
-		MAX7219_MatrixSetRow64(0, numbers[0]);			
-		MAX7219_MatrixUpdate();		
-		HAL_Delay(1000);	
+			*/			
 		
-		MAX7219_MatrixSetRow64(1, numbers[3]);		
-		MAX7219_MatrixUpdate();
-		HAL_Delay(1000);
 		
-		MAX7219_MatrixSetRow64(2, numbers[2]);		
-		MAX7219_MatrixUpdate();
-		HAL_Delay(1000);
 		
-		MAX7219_MatrixSetRow64(3, numbers[9]);		
-		MAX7219_MatrixUpdate();			
-		HAL_Delay(1000);
 		
-		MAX7219_MatrixSetRow64(0, Atoz['I'- 65]);
-		MAX7219_MatrixSetRow64(1, symbol[1]);
-		MAX7219_MatrixSetRow64(2, Atoz['Y' - 65]);
-		MAX7219_MatrixSetRow64(3, Atoz['J' - 65]);
-		MAX7219_MatrixUpdate();
-		HAL_Delay(5000);
-		
-		for(int i = 0; i < 24; i++)
-		{
-			MAX7219_MatrixLShift(1);
-			MAX7219_MatrixUpdate();
-			HAL_Delay(100);
-		}
-						
-		for(int i = 0; i < 24; i++)
-		{
-			MAX7219_MatrixRShift(1);
-			MAX7219_MatrixUpdate();
-			HAL_Delay(100);
-		}	
-		HAL_Delay(5000);
-    /* USER CODE END WHILE */
+		change_num_to(num++);	
+		GPIOA->ODR ^= 1<<4;
+		/* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
   }
@@ -339,10 +313,10 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOA_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_3, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_3|GPIO_PIN_4, GPIO_PIN_RESET);
 
-  /*Configure GPIO pin : PA3 */
-  GPIO_InitStruct.Pin = GPIO_PIN_3;
+  /*Configure GPIO pins : PA3 PA4 */
+  GPIO_InitStruct.Pin = GPIO_PIN_3|GPIO_PIN_4;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
@@ -351,7 +325,62 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
-
+void change_num_to(unsigned int new_num)
+{
+	static unsigned int prev_num;
+	unsigned int dl0, dl1, dl2, dl3, dn0, dn1, dn2, dn3, i, k;
+	dl0 = prev_num - (prev_num / 10)*10;
+	dl1 = prev_num /10 - (prev_num / 100)*10;
+	dl2 = prev_num /100 - (prev_num / 1000)*10;
+	dl3 = prev_num /1000 - (prev_num / 10000)*10;
+	
+	dn0 = new_num - (new_num / 10)*10;
+	dn1 = new_num /10 - (new_num / 100)*10;
+	dn2 = new_num /100 - (new_num / 1000)*10;
+	dn3 = new_num /1000 - (new_num / 10000)*10;
+	for (k=0;k<8;k++)
+	{
+			for (i=7;i>=1;i--)
+			{
+				if (dn0 != dl0)
+				{
+					FrameBuffer[0][i] = FrameBuffer[0][i-1];
+				}
+				if (dn1 != dl1)
+				{
+					FrameBuffer[1][i] = FrameBuffer[1][i-1];
+				}
+				if (dn2 != dl2)
+				{
+					FrameBuffer[2][i] = FrameBuffer[2][i-1];
+				}
+				if (dn3 != dl3)
+				{
+					FrameBuffer[3][i] = FrameBuffer[3][i-1];
+				}
+			}
+			if (dn0 != dl0)
+			{
+				FrameBuffer[0][0] = (numbers[dn0] & (((uint64_t)255)<<(8*k)))>>(8*k);
+			}
+			if (dn1 != dl1)
+			{
+				FrameBuffer[1][0] = (numbers[dn1] & (((uint64_t)255)<<(8*k)))>>(8*k);
+			}
+			if (dn2 != dl2)
+			{
+				FrameBuffer[2][0] = (numbers[dn2] & (((uint64_t)255)<<(8*k)))>>(8*k);
+			}
+			if (dn3 != dl3)
+			{
+				FrameBuffer[3][0] = (numbers[dn3] & (((uint64_t)255)<<(8*k)))>>(8*k);
+			}
+			
+		MAX7219_MatrixUpdate();
+		HAL_Delay(125);
+	}
+	prev_num = new_num;
+}
 /* USER CODE END 4 */
 
 /**

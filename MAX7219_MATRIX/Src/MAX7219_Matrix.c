@@ -63,21 +63,21 @@ void MAX7219_MatrixRShift(uint8_t step)
 	
 	for(int i=0; i < 8; i++)
 	{				
-		msbD0 = ((FrameBuffer[0][i] & 0x80) >> 7);		
-		FrameBuffer[0][i] = FrameBuffer[0][i] << 1;
-		
-		msbD1 = ((FrameBuffer[1][i] & 0x80) >> 7);
-		FrameBuffer[1][i] = FrameBuffer[1][i] << 1;
-		FrameBuffer[1][i] |= msbD0;		
-		
-		msbD2 = ((FrameBuffer[2][i] & 0x80) >> 7);
-		FrameBuffer[2][i] = FrameBuffer[2][i] << 1;
-		FrameBuffer[2][i] |= msbD1;		
-		
-		msbD3 = ((FrameBuffer[3][i] & 0x80) >> 7);
+		msbD0 = ((FrameBuffer[3][i] & 0x80) >> 7);		
 		FrameBuffer[3][i] = FrameBuffer[3][i] << 1;
-		FrameBuffer[3][i] |= msbD2;					
-		FrameBuffer[0][i] |= msbD3;
+		
+		msbD1 = ((FrameBuffer[2][i] & 0x80) >> 7);
+		FrameBuffer[2][i] = FrameBuffer[2][i] << 1;
+		FrameBuffer[2][i] |= msbD0;		
+		
+		msbD2 = ((FrameBuffer[1][i] & 0x80) >> 7);
+		FrameBuffer[1][i] = FrameBuffer[1][i] << 1;
+		FrameBuffer[1][i] |= msbD1;		
+		
+		msbD3 = ((FrameBuffer[0][i] & 0x80) >> 7);
+		FrameBuffer[0][i] = FrameBuffer[0][i] << 1;
+		FrameBuffer[0][i] |= msbD2;					
+		FrameBuffer[3][i] |= msbD3;
 	}	
 }
 
@@ -87,21 +87,21 @@ void MAX7219_MatrixLShift(uint8_t step)
 	
 	for(int i=0; i < 8; i++)
 	{
-		lsbD3 = ((FrameBuffer[3][i] & 0x01) << 7);
-		FrameBuffer[3][i] = FrameBuffer[3][i] >> 1;
-				
-		lsbD2 = ((FrameBuffer[2][i] & 0x01) << 7);
-		FrameBuffer[2][i] = FrameBuffer[2][i] >> 1;
-		FrameBuffer[2][i] |= lsbD3;
-		
-		lsbD1 = ((FrameBuffer[1][i] & 0x01) << 7);
-		FrameBuffer[1][i] = FrameBuffer[1][i] >> 1;
-		FrameBuffer[1][i] |= lsbD2;
-		
-		lsbD0 = ((FrameBuffer[0][i] & 0x01) << 7);
+		lsbD3 = ((FrameBuffer[0][i] & 0x01) << 7);
 		FrameBuffer[0][i] = FrameBuffer[0][i] >> 1;
-		FrameBuffer[0][i] |= lsbD1;
-		FrameBuffer[3][i] |= lsbD0;
+				
+		lsbD2 = ((FrameBuffer[1][i] & 0x01) << 7);
+		FrameBuffer[1][i] = FrameBuffer[1][i] >> 1;
+		FrameBuffer[1][i] |= lsbD3;
+		
+		lsbD1 = ((FrameBuffer[2][i] & 0x01) << 7);
+		FrameBuffer[2][i] = FrameBuffer[2][i] >> 1;
+		FrameBuffer[2][i] |= lsbD2;
+		
+		lsbD0 = ((FrameBuffer[3][i] & 0x01) << 7);
+		FrameBuffer[3][i] = FrameBuffer[3][i] >> 1;
+		FrameBuffer[3][i] |= lsbD1;
+		FrameBuffer[0][i] |= lsbD0;
 	}
 }
 
