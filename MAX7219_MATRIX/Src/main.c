@@ -207,17 +207,6 @@ int main(void)
 	HAL_Delay(200);
   while (1)
   {
-		/*MAX7219_MatrixSetRow64(3, symbol[0]);
-		MAX7219_MatrixSetRow64(2, symbol[0]);
-		MAX7219_MatrixSetRow64(1, symbol[0]);
-		MAX7219_MatrixSetRow64(0, symbol[0]);		
-		MAX7219_MatrixUpdate();		
-		HAL_Delay(5000);
-			*/			
-		
-		
-		
-		
 		change_num_to(num++);	
 		GPIOA->ODR ^= 1<<4;
     /* USER CODE END WHILE */
