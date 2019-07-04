@@ -208,7 +208,7 @@ int main(void)
   while (1)
   {
 		change_num_to(num++);	
-		GPIOA->ODR ^= 1<<4;
+		GPIOA->ODR ^= 1<<4; // Blinking
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
